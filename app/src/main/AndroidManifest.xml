@@ -13,6 +13,13 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ScreenWatcher"
         tools:targetApi="31">
+
+        <service
+            android:name=".ScreenWatcherMobileService"
+            android:enabled="true"
+            android:exported="true"
+            android:process=".screenWatcherMobileService" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true"

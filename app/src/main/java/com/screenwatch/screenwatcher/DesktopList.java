@@ -7,13 +7,12 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.navigation.fragment.NavHostFragment;
 
-import com.screenwatch.screenwatcher.databinding.FragmentSecondBinding;
+import com.screenwatch.screenwatcher.databinding.DesktopListBinding;
 
-public class SecondFragment extends Fragment {
+public class DesktopList extends Fragment {
 
-    private FragmentSecondBinding binding;
+    private DesktopListBinding binding;
 
     @Override
     public View onCreateView(
@@ -21,21 +20,24 @@ public class SecondFragment extends Fragment {
             Bundle savedInstanceState
     ) {
 
-        binding = FragmentSecondBinding.inflate(inflater, container, false);
+        binding = DesktopListBinding.inflate(inflater, container, false);
+
         return binding.getRoot();
 
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        binding.buttonSecond.setOnClickListener(new View.OnClickListener() {
+/*
+        binding.buttonFirst.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(SecondFragment.this)
-                        .navigate(R.id.action_SecondFragment_to_FirstFragment);
+                NavHostFragment.findNavController(FirstFragment.this)
+                        .navigate(R.id.action_FirstFragment_to_SecondFragment);
             }
         });
+        */
+
     }
 
     @Override
