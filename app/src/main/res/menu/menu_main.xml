@@ -8,4 +8,10 @@
         android:orderInCategory="100"
         android:title="Настройки"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_update"
+        android:onClick="onUpdate"
+        android:orderInCategory="100"
+        android:title="Обновить"
+        app:showAsAction="never" />
 </menu>

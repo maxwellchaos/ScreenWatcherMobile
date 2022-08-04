@@ -71,4 +71,10 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), "Переход в настройки", Toast.LENGTH_SHORT)
                 .show();
     }
+    public void onUpdate(MenuItem item)
+    {
+        //переход к настройкам
+        Toast.makeText(getApplicationContext(), "Обновление списка компьютеров", Toast.LENGTH_SHORT)
+                .show();
+    }
 }
