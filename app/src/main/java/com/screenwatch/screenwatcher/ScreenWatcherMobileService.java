@@ -57,7 +57,7 @@ public class ScreenWatcherMobileService extends Service {
         //stopSelf();
         LoopingGetData();
         //при релизе нужно возвращать  START_STICKY
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     private Notification CreateNotification(String NotificationText, boolean isStartStop)
@@ -156,13 +156,9 @@ public class ScreenWatcherMobileService extends Service {
             public void run() {
                 while(true)
                 {
-
                     try {
                         //подождать
                         Thread.sleep(3000);//30 секунд
-
-                        //проверить подключение к интернету
-
 
                         List<Desktop> newDesktopList;
                         //взять данные с сервиса

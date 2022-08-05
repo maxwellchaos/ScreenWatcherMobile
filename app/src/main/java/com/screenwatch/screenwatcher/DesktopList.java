@@ -100,12 +100,12 @@ public class DesktopList extends Fragment {
                                 statusItem.setBackgroundColor(Color.MAGENTA);
                                 break;
                             case 1:
-                                statusItem.setText("Работает");
-                                statusItem.setBackgroundColor(Color.GREEN);
-                                break;
-                            case 2:
                                 statusItem.setText("Остановлен");
                                 statusItem.setBackgroundColor(Color.RED);
+                                break;
+                            case 2:
+                                statusItem.setText("Работает");
+                                statusItem.setBackgroundColor(Color.GREEN);
                                 break;
                             case 3:
                                 statusItem.setText("Заблокирован");
