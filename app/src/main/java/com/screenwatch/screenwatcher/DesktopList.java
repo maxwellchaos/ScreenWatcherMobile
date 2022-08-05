@@ -1,6 +1,7 @@
 package com.screenwatch.screenwatcher;
 
 import android.graphics.Color;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -38,62 +39,96 @@ public class DesktopList extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         //получить список со всеми десктопами
         ListLayout = (LinearLayout) view.findViewById(R.id.ListLayout);
-        //Удалить все из него
-        ListLayout.removeAllViews();
-        try {
-            List<Desktop> dataItems = Desktop.Parse(Desktop.getContent("http://62.109.29.127:80/api/ToMobile/"));
-            Log.e("err", String.valueOf(dataItems.size()));
-            for (Desktop item:dataItems) {
-                //Название компа
-                TextView textItem = new TextView(ListLayout.getContext());
-                textItem.setText(item.getComputerName());
-                ListLayout.addView(textItem);
-                //ID компа
-                TextView idItem = new TextView(ListLayout.getContext());
-                idItem.setText(item.getComputerId());
-                ListLayout.addView(idItem);
-                //Статус компа
-                TextView statusItem = new TextView(ListLayout.getContext());
-                switch (item.getStatus())
-                {
-                    case 0:
-                        statusItem.setText("Нет соединения ");
-                        statusItem.setBackgroundColor(Color.MAGENTA);
-                        break;
-                    case 1:
-                        statusItem.setText("Работает");
-                        statusItem.setBackgroundColor(Color.GREEN);
-                        break;
-                    case 2:
-                        statusItem.setText("Остановлен");
-                        statusItem.setBackgroundColor(Color.RED);
-                        break;
-                    case 3:
-                        statusItem.setText("Заблокирован");
-                        break;
-                    case 4:
-                        statusItem.setText("Ожидат данные");
-                        break;
-                }
-                statusItem.append(item.getLastChangeStatusDate().toString());
 
-                ListLayout.addView(statusItem);
-            }
-        }
-        catch (Exception ex)
-        {
-            TextView statusItem = new TextView(ListLayout.getContext());
-            statusItem.setText("Ошибка загрузки данных:"+ex.getMessage());
-            ListLayout.addView(statusItem,0);
-        }
+        TextView textItem = new TextView(ListLayout.getContext());
+        textItem.setText("Подключаюсь к серверу:"+((MainActivity)getActivity()).getIpAddress());
+        ListLayout.addView(textItem);
 
 
+        //Запуск задачи на получение данных от сервиса
+        new  ProgressTask().execute();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    class ProgressTask extends AsyncTask<Void, Integer, Void> {
+        String result;
+        String connectionError = null;
+
+        @Override
+        protected Void doInBackground(Void... unused) {
+            try {
+                //result = Desktop.getContent("http://62.109.29.127:80/api/ToMobile/");
+                String ipAdress = ((MainActivity)getActivity()).getIpAddress();
+                result = Desktop.getContent("http://" + ipAdress + ":80/api/ToMobile/");
+            } catch (Exception ex) {
+                connectionError = ex.getMessage();
+            }
+
+            return (null);
+        }
+
+        @Override
+        protected void onPostExecute(Void unused) {
+            if (connectionError == null) {
+
+                //удалить все компьютеры из списка
+                ListLayout.removeAllViews();
+
+                try {
+                    //Разбираю полученные данные
+                    List<Desktop> dataItems = Desktop.Parse(result);
+                    for (Desktop item : dataItems) {
+                        Log.d("getting Data",item.getComputerName());
+                        //Название компа
+                        TextView textItem = new TextView(ListLayout.getContext());
+                        textItem.setText(item.getComputerName());
+                        ListLayout.addView(textItem);
+                        //ID компа
+                        TextView idItem = new TextView(ListLayout.getContext());
+                        idItem.setText(item.getComputerId());
+                        ListLayout.addView(idItem);
+                        //Статус компа
+                        TextView statusItem = new TextView(ListLayout.getContext());
+                        switch (item.getStatus()) {
+                            case 0:
+                                statusItem.setText("Нет соединения ");
+                                statusItem.setBackgroundColor(Color.MAGENTA);
+                                break;
+                            case 1:
+                                statusItem.setText("Работает");
+                                statusItem.setBackgroundColor(Color.GREEN);
+                                break;
+                            case 2:
+                                statusItem.setText("Остановлен");
+                                statusItem.setBackgroundColor(Color.RED);
+                                break;
+                            case 3:
+                                statusItem.setText("Заблокирован");
+                                break;
+                            case 4:
+                                statusItem.setText("Ожидат данные");
+                                break;
+                        }
+                        statusItem.append(item.getLastChangeStatusDate().toString());
+
+                        ListLayout.addView(statusItem);
+                    }
+                } catch (Exception ex) {
+                    TextView statusItem = new TextView(ListLayout.getContext());
+                    statusItem.setText("Ошибка загрузки данных:" + ex.getMessage());
+                    ListLayout.addView(statusItem, 0);
+                }
+            }
+            else
+            {
+
+            }
+        }
     }
 
 }

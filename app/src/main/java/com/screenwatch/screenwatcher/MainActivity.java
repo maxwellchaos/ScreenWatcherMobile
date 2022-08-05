@@ -1,10 +1,9 @@
 package com.screenwatch.screenwatcher;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
@@ -19,12 +18,12 @@ public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
 
-
+    public SharedPreferences settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        settings = getSharedPreferences("serverSettings",MODE_PRIVATE);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -35,6 +34,16 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
+    }
+    public void saveIpAdress(String serverIpAdress)
+    {
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString("serverIpAddress",serverIpAdress);
+        editor.apply();
+    }
+    public String getIpAddress()
+    {
+        return settings.getString("serverIpAddress",null);
     }
 
     @Override
@@ -69,14 +78,15 @@ public class MainActivity extends AppCompatActivity {
     {
         //переход к настройкам
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
-        navController.navigate(R.id.action_FirstFragment_to_SecondFragment);
-        Toast.makeText(getApplicationContext(), "Переход в настройки", Toast.LENGTH_SHORT)
-                .show();
+        navController.navigate(R.id.Settings);
+        //Исправляю меню
+        //item.setEnabled(false);
+
     }
     public void onUpdate(MenuItem item)
     {
         //переход к настройкам
-        Toast.makeText(getApplicationContext(), "Обновление списка компьютеров", Toast.LENGTH_SHORT)
-                .show();
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+        navController.navigate(R.id.DesktopList);
     }
 }
