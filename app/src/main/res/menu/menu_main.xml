@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.screenwatch.screenwatcher.MainActivity">
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/Settings"
         android:onClick="onSettings"
         android:orderInCategory="100"
         android:title="Настройки"
@@ -14,5 +14,11 @@
         android:onClick="onUpdate"
         android:orderInCategory="100"
         android:title="Обновить"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_DesktopList_to_DesktopAdd"
+        android:onClick="onDesktopAdd"
+        android:orderInCategory="100"
+        android:title="Добавить десктоп"
         app:showAsAction="never" />
 </menu>

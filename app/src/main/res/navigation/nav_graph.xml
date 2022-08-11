@@ -14,6 +14,9 @@
         <action
             android:id="@+id/action_FirstFragment_to_SecondFragment"
             app:destination="@id/Settings" />
+        <action
+            android:id="@+id/action_DesktopList_to_DesktopAdd"
+            app:destination="@id/DesktopAdd" />
     </fragment>
     <fragment
         android:id="@+id/Settings"
@@ -23,6 +26,17 @@
 
         <action
             android:id="@+id/action_SecondFragment_to_FirstFragment"
+            app:destination="@id/DesktopList" />
+    </fragment>
+    <fragment
+        android:id="@+id/DesktopAdd"
+        android:name="com.screenwatch.screenwatcher.desktop_add"
+        android:label="Добавление десктопа"
+        tools:layout="@layout/fragment_desktop_add">
+
+
+        <action
+            android:id="@+id/action_DesktopAdd_to_DesktopList"
             app:destination="@id/DesktopList" />
     </fragment>
 </navigation>

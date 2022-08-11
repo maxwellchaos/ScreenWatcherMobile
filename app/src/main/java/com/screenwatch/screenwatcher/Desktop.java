@@ -1,5 +1,7 @@
 package com.screenwatch.screenwatcher;
 
+import androidx.annotation.NonNull;
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -113,6 +115,7 @@ public class Desktop extends Object {
     }
 
     //Взять данные с сервера по http
+    @NonNull
     public static String getContent(String path) throws IOException {
         BufferedReader reader = null;
         InputStream stream = null;

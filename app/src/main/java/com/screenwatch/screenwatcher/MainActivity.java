@@ -46,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         return settings.getString("serverIpAddress",null);
     }
 
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -60,11 +61,11 @@ public class MainActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+/*        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
             return true;
         }
-
+*/
         return super.onOptionsItemSelected(item);
     }
 
@@ -88,5 +89,11 @@ public class MainActivity extends AppCompatActivity {
         //переход к настройкам
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
         navController.navigate(R.id.DesktopList);
+    }
+    public void onDesktopAdd(MenuItem item)
+    {
+        //переход к настройкам
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_content_main);
+        navController.navigate(R.id.DesktopAdd);
     }
 }

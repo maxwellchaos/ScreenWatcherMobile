@@ -78,11 +78,15 @@ public class DesktopList extends Fragment {
 
                 //удалить все компьютеры из списка
                 ListLayout.removeAllViews();
+                DesktopIdList idList = new DesktopIdList(getContext());
 
                 try {
                     //Разбираю полученные данные
                     List<Desktop> dataItems = Desktop.Parse(result);
                     for (Desktop item : dataItems) {
+                        if(!idList.contains(item.getComputerId())) {
+                            continue;
+                        }
                         Log.d("getting Data",item.getComputerName());
                         //Название компа
                         TextView textItem = new TextView(ListLayout.getContext());
