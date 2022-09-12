@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
@@ -35,7 +36,6 @@ public class Settings extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         edit = view.findViewById(R.id.editServerIpAdress);
         edit.setText(((MainActivity)getActivity()).getIpAddress());
-        //Button buttonStart = getActivity().findViewById(R.id.buttonStart);
 
         binding.buttonSecond.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -46,22 +46,25 @@ public class Settings extends Fragment {
                         .navigate(R.id.action_SecondFragment_to_FirstFragment);
             }
         });
+        //запустить сервис слежения
+        //Сообщение о запуске службы будет показано самой службой
         binding.buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.e("out","onStartService finished");
                 Intent serviceIntent = new Intent(((MainActivity)getActivity()), ScreenWatcherMobileService.class);
                 serviceIntent.putExtra("inputExtra", "Foreground Service Example in Android");
                 ContextCompat.startForegroundService(((MainActivity)getActivity()),serviceIntent);
-                Log.e("out","onStartService finished");
             }
         });
+
+        //остновка службы
         binding.buttonStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 Intent serviceIntent = new Intent(((MainActivity)getActivity()), ScreenWatcherMobileService.class);
                 getActivity().stopService(serviceIntent);
+                Toast.makeText(getContext(), "Слежение остановлено", Toast.LENGTH_SHORT).show();
             }
         });
     }

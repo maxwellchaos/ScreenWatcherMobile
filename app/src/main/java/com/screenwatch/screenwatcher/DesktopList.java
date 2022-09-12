@@ -15,7 +15,11 @@ import androidx.fragment.app.Fragment;
 
 import com.screenwatch.screenwatcher.databinding.DesktopListBinding;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.TimeZone;
 
 public class DesktopList extends Fragment {
 
@@ -80,6 +84,17 @@ public class DesktopList extends Fragment {
                 ListLayout.removeAllViews();
                 DesktopIdList idList = new DesktopIdList(getContext());
 
+                Calendar cal = Calendar.getInstance();
+                TimeZone tz = cal.getTimeZone();
+
+                /* debug: is it local time? */
+                Log.d("Time zone: ", tz.getDisplayName());
+
+                /* date formatter in local timezone */
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+                sdf.setTimeZone(tz);
+
+
                 try {
                     //Разбираю полученные данные
                     List<Desktop> dataItems = Desktop.Parse(result);
@@ -118,8 +133,12 @@ public class DesktopList extends Fragment {
                                 statusItem.setText("Ожидат данные");
                                 break;
                         }
-                        statusItem.append(item.getLastChangeStatusDate().toString());
+                        /* print your timestamp and double check it the date you expect */
+                        long timestamp = item.getLastChangeStatusDate().getTime();
+                        String localTime = sdf.format(new Date(timestamp));
 
+                        statusItem.append(localTime);
+                        //statusItem.append(tz.getDisplayName());
                         ListLayout.addView(statusItem);
                     }
                 } catch (Exception ex) {
@@ -130,6 +149,7 @@ public class DesktopList extends Fragment {
             }
             else
             {
+                //проблемы с интернетом
 
             }
         }

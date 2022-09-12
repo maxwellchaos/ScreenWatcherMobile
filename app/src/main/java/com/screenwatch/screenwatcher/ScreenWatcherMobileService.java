@@ -9,11 +9,14 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.media.AudioAttributes;
+import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
+import android.provider.MediaStore;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
@@ -22,7 +25,10 @@ import java.util.List;
 
 public class ScreenWatcherMobileService extends Service {
     public ScreenWatcherMobileService() {
-    }
+        }
+
+    //Звук изменения состояния десктопа
+    private MediaPlayer notificationSound;
 
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
 
@@ -30,7 +36,7 @@ public class ScreenWatcherMobileService extends Service {
     private List<Desktop> desktopList;
     // private Notification notification;
     private  Intent ForedgroundServiceIntent;
-    String alarmChannelId = "alarmChannel";
+    String alarmChannelId = "mySoundChannel";
     String startStopChannelId = "serviceChannel";
     String alarmChannelName = "Предупреждения об отключении десктопов";
     String startStopChannelNmae = "Уведомления о запуске/остановке службы слежения";
@@ -38,6 +44,8 @@ public class ScreenWatcherMobileService extends Service {
     @Override
     public void onCreate()
     {
+        notificationSound = MediaPlayer.create(this,R.raw.uvedomlenie_0_db);
+
         //Log.e("err", "onCreate");
         super.onCreate();
 
@@ -48,6 +56,7 @@ public class ScreenWatcherMobileService extends Service {
     public int onStartCommand(Intent intent,int flags, int startId)
     {
         ForedgroundServiceIntent = intent;
+        Toast.makeText((this), "Слежение запущено", Toast.LENGTH_SHORT).show();
         //Создать уведомление
         Notification notification = CreateNotification("",true);
 
@@ -113,10 +122,11 @@ public class ScreenWatcherMobileService extends Service {
             notificationChannel.enableLights(true);
             //Звук
             if(channelId == alarmChannelId) {
-                Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+               // Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
                 AudioAttributes.Builder audioAttributes = new AudioAttributes.Builder()
                         .setUsage(AudioAttributes.USAGE_ALARM);
-                notificationChannel.setSound(soundUri, audioAttributes.build());
+                //notificationChannel.setSound(soundUri, audioAttributes.build());
+                notificationChannel.setSound(null,null);
             }
             else
             {
@@ -151,14 +161,16 @@ public class ScreenWatcherMobileService extends Service {
     //запуск фоновой задачи на получение данных с сервиса
     private void LoopingGetData()
     {
+
         Thread thread = new Thread(new Runnable() {
             @Override
             public void run() {
+                boolean previousError = true;
                 while(true)
                 {
                     try {
                         //подождать
-                        Thread.sleep(3000);//30 секунд
+                        Thread.sleep(3000);//3 секунд
 
                         List<Desktop> newDesktopList;
                         //взять данные с сервиса
@@ -180,7 +192,6 @@ public class ScreenWatcherMobileService extends Service {
                                 //Подключен новый десктоп
                                 Log.d("MyService","Подключен новый десктоп");
                                 continue;
-
                             }
 
                             Desktop oldDesktop = ScreenWatcherMobileService.this.desktopList.get(index);
@@ -188,7 +199,7 @@ public class ScreenWatcherMobileService extends Service {
                             if(oldDesktop.getStatus() != desktop.getStatus())
                             {
                                 //Сообщать только если статус изменился особым образом
-                                if(oldDesktop.getStatus() == 2 && desktop.getStatus() !=2)
+                                if(oldDesktop.getStatus() != desktop.getStatus())
                                 {
                                     String notificationText = "Компьютер \""+desktop.getComputerName()+"\" изменил свой статус на ";
                                     if(desktop.getStatus() == 0)
@@ -199,6 +210,10 @@ public class ScreenWatcherMobileService extends Service {
                                     {
                                         notificationText += "\"Остановлен\"";
                                     }
+                                    if(desktop.getStatus() == 2)
+                                    {
+                                        notificationText += "\"Работает\"";
+                                    }
                                     if(desktop.getStatus() == 3)
                                     {
                                         notificationText += "\"Заблокирован\"";
@@ -207,6 +222,7 @@ public class ScreenWatcherMobileService extends Service {
                                     {
                                         notificationText += "\"Разблокирован\"";
                                     }
+                                    notificationSound.start();
                                     Notification notification = CreateNotification(notificationText,false);
                                     NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                                     mNotificationManager.notify(2, notification);
@@ -214,10 +230,17 @@ public class ScreenWatcherMobileService extends Service {
                             }
                         }
                         ScreenWatcherMobileService.this.desktopList = newDesktopList;
+                        previousError = false;
                     }
-                    catch (Exception ex)
-                    {
-                        Log.e("MyService","Ошибка получения данных с сервера: "+ ex.getMessage());
+                    catch (Exception ex) {
+                        if (!previousError) {
+                            notificationSound.start();
+                            Notification notification = CreateNotification("Ошибка получения данных с сервера. Проверьте интернет соединение.", false);
+                            NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                            mNotificationManager.notify(3, notification);
+                            previousError = true;
+                            Log.e("MyService", "Ошибка получения данных с сервера: " + ex.getMessage());
+                        }
                     }
                 }
             }
