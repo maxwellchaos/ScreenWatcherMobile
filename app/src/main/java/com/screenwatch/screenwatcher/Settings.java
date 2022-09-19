@@ -2,7 +2,6 @@ package com.screenwatch.screenwatcher;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,10 +25,8 @@ public class Settings extends Fragment {
             LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState
     ) {
-
         binding = SettingsBinding.inflate(inflater, container, false);
         return binding.getRoot();
-
     }
 
     public void onViewCreated(@NonNull View view, Bundle savedInstanceState) {
@@ -37,11 +34,12 @@ public class Settings extends Fragment {
         edit = view.findViewById(R.id.editServerIpAdress);
         edit.setText(((MainActivity)getActivity()).getIpAddress());
 
+        //Сохранение настроек
         binding.buttonSecond.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MainActivity)getActivity()).saveIpAdress(edit.getText().toString());
-
+                ((MainActivity)getActivity()).saveIpAddress(edit.getText().toString());
+                ((MainActivity) getActivity()).ServiceStart();
                 NavHostFragment.findNavController(Settings.this)
                         .navigate(R.id.action_SecondFragment_to_FirstFragment);
             }
@@ -51,9 +49,7 @@ public class Settings extends Fragment {
         binding.buttonStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent serviceIntent = new Intent(((MainActivity)getActivity()), ScreenWatcherMobileService.class);
-                serviceIntent.putExtra("inputExtra", "Foreground Service Example in Android");
-                ContextCompat.startForegroundService(((MainActivity)getActivity()),serviceIntent);
+                ((MainActivity)getActivity()).ServiceStart();
             }
         });
 
@@ -62,9 +58,7 @@ public class Settings extends Fragment {
             @Override
             public void onClick(View view) {
 
-                Intent serviceIntent = new Intent(((MainActivity)getActivity()), ScreenWatcherMobileService.class);
-                getActivity().stopService(serviceIntent);
-                Toast.makeText(getContext(), "Слежение остановлено", Toast.LENGTH_SHORT).show();
+                ((MainActivity) getActivity()).ServiceStop();
             }
         });
     }

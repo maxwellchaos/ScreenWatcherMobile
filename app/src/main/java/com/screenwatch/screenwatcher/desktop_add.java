@@ -56,6 +56,7 @@ public class desktop_add extends Fragment {
                 //((MainActivity)getActivity()).saveIpAdress(edit.getText().toString());
                 DesktopIdList idList = new DesktopIdList(getActivity());
                 idList.addDesktopId(edit.getText().toString());
+                ((MainActivity)getActivity()).ServiceStart();
 
                 NavHostFragment.findNavController(desktop_add.this)
                         .navigate(R.id.action_DesktopAdd_to_DesktopList);

@@ -5,6 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -36,15 +37,40 @@ public class MainActivity extends AppCompatActivity {
                 .build();
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
+        ServiceStart();
+    }
+    public void ServiceStart()
+    {
+        //Попытка остановить службу
+        ServiceStop();
+
         //Это запуск службы слежения
         Intent serviceIntent = new Intent(this, ScreenWatcherMobileService.class);
-        serviceIntent.putExtra("inputExtra", "Foreground Service Example in Android");
+        serviceIntent.putExtra("ipAddress", getIpAddress());
+
+        settings = this.getSharedPreferences(DesktopIdList.clientSettings,MODE_PRIVATE);
+        String data = settings.getString(DesktopIdList.idsList,null);
+        serviceIntent.putExtra("idsList", data);
+
         ContextCompat.startForegroundService(this,serviceIntent);
     }
-    public void saveIpAdress(String serverIpAdress)
+    public void ServiceStop()
+    {
+        try {
+            Intent serviceIntent = new Intent(this, ScreenWatcherMobileService.class);
+            stopService(serviceIntent);
+            Toast.makeText(this, "Слежение остановлено", Toast.LENGTH_SHORT).show();
+        }
+        catch(Exception e)
+        {
+
+        }
+
+    }
+    public void saveIpAddress(String serverIpAddress)
     {
         SharedPreferences.Editor editor = settings.edit();
-        editor.putString("serverIpAddress",serverIpAdress);
+        editor.putString("serverIpAddress",serverIpAddress);
         editor.apply();
     }
     public String getIpAddress()

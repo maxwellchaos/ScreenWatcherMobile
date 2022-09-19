@@ -25,6 +25,7 @@ public class DesktopList extends Fragment {
 
     private DesktopListBinding binding;
 
+    //Это интерфейс - список компов на экране
     LinearLayout ListLayout;
 
     @Override
@@ -133,7 +134,7 @@ public class DesktopList extends Fragment {
                                 statusItem.setText("Ожидат данные");
                                 break;
                         }
-                        /* print your timestamp and double check it the date you expect */
+                        //преобразование в нужную временную зону
                         long timestamp = item.getLastChangeStatusDate().getTime();
                         String localTime = sdf.format(new Date(timestamp));
 

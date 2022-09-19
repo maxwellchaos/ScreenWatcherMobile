@@ -18,8 +18,8 @@ public class DesktopIdList implements DesktopIdRepositopy
     private SharedPreferences settings;
     private Context _context;
 
-    final String clientSettings = "clientSettings";
-    final String idsList = "IdsList";
+    public static String clientSettings = "clientSettings";
+    public static String idsList = "IdsList";
 
 
     public DesktopIdList(Context context) {
@@ -30,7 +30,17 @@ public class DesktopIdList implements DesktopIdRepositopy
         settings = _context.getSharedPreferences(clientSettings,MODE_PRIVATE);
 
         String data = settings.getString(idsList,null);
-        if(data == null) {
+        IdListFromString(data);
+    }
+
+    public DesktopIdList(String data)
+    {
+        IdListFromString(data);
+    }
+
+    public void IdListFromString(String idLists)
+    {
+        if(idLists == null) {
             idList = new ArrayList<String>();
         }
         else {
@@ -38,7 +48,7 @@ public class DesktopIdList implements DesktopIdRepositopy
             Gson gson = new Gson();
             Type listOfComputerIds = new TypeToken<ArrayList<String>>() {
             }.getType();
-            idList = gson.fromJson(data, listOfComputerIds);
+            idList = gson.fromJson(idLists, listOfComputerIds);
         }
     }
 
