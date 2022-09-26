@@ -98,9 +98,13 @@ public class Desktop extends Object {
 
     //Перегргка метода equals чтобы объекты были равны только по их идентификаторам
     @Override
-    public boolean equals(Object obj) {
-        if (obj.getClass() != this.getClass())
+    public boolean equals(Object obj){
+        if(obj == null) {
             return false;
+        }
+        if (obj.getClass() != this.getClass()) {
+            return false;
+        }
         if (((Desktop) obj).computerId.equals(this.computerId))
             return true;
         return false;
@@ -108,15 +112,25 @@ public class Desktop extends Object {
     }
     public static List<Desktop> Parse(String content)
     {
-        Gson gson = new Gson();
-        Type listOfComputers = new TypeToken<ArrayList<Desktop>>() {}.getType();
-        List<Desktop> dataItems = gson.fromJson(content, listOfComputers);
-        return dataItems;
+        List<Desktop> dataItems;
+        FileLog.d("method start with content:"+content);
+        try {
+            Gson gson = new Gson();
+            Type listOfComputers = new TypeToken<ArrayList<Desktop>>() {
+            }.getType();
+            dataItems = gson.fromJson(content, listOfComputers);
+            FileLog.d("method finish, Returned list count:"+String.valueOf( dataItems.size()));
+            return dataItems;
+        }catch (Exception ex) {
+            FileLog.d("method finish with exception:"+ex.getMessage());
+        }
+        return null;
     }
 
     //Взять данные с сервера по http
     @NonNull
     public static String getContent(String path) throws IOException {
+        FileLog.d("method start with path:" + path);
         BufferedReader reader = null;
         InputStream stream = null;
         HttpURLConnection connection = null;
@@ -137,6 +151,7 @@ public class Desktop extends Object {
             while ((line = reader.readLine()) != null) {
                 buf.append(line).append("\n");
             }
+            FileLog.d("method finish, Returned data:" + (buf.toString()));
             return (buf.toString());
         } finally {
             if (reader != null) {
@@ -148,9 +163,8 @@ public class Desktop extends Object {
             if (connection != null) {
                 connection.disconnect();
             }
-
+            FileLog.d("method finish with exception");
         }
-
     }
 
 }

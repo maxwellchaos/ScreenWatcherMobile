@@ -21,11 +21,18 @@ public class MainActivity extends AppCompatActivity {
     private AppBarConfiguration appBarConfiguration;
     private ActivityMainBinding binding;
 
+    private static final int PERMISSION_STORAGE = 101;
+
     public SharedPreferences settings;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        //Запрос прав на файлы для логгирования
+        if (!PermissionUtils.hasPermissions(MainActivity.this))
+        PermissionUtils.requestPermissions(MainActivity.this, PERMISSION_STORAGE);
+
         settings = getSharedPreferences("serverSettings",MODE_PRIVATE);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -41,21 +48,31 @@ public class MainActivity extends AppCompatActivity {
     }
     public void ServiceStart()
     {
-        //Попытка остановить службу
-        ServiceStop();
+        try {
+            FileLog.d("method start");
 
-        //Это запуск службы слежения
-        Intent serviceIntent = new Intent(this, ScreenWatcherMobileService.class);
-        serviceIntent.putExtra("ipAddress", getIpAddress());
+            //Попытка остановить службу
+            ServiceStop();
 
-        settings = this.getSharedPreferences(DesktopIdList.clientSettings,MODE_PRIVATE);
-        String data = settings.getString(DesktopIdList.idsList,null);
-        serviceIntent.putExtra("idsList", data);
+            //Это запуск службы слежения
+            Intent serviceIntent = new Intent(this, ScreenWatcherMobileService.class);
+            serviceIntent.putExtra("ipAddress", getIpAddress());
 
-        ContextCompat.startForegroundService(this,serviceIntent);
+            settings = this.getSharedPreferences(DesktopIdList.clientSettings, MODE_PRIVATE);
+            String data = settings.getString(DesktopIdList.idsList, null);
+            serviceIntent.putExtra("idsList", data);
+
+            ContextCompat.startForegroundService(this, serviceIntent);
+            FileLog.d("method finish");
+        }
+        catch (Exception ex)
+        {
+            FileLog.d("method finish with exception: "+ex.getMessage());
+        }
     }
     public void ServiceStop()
     {
+        FileLog.d("method start");
         try {
             Intent serviceIntent = new Intent(this, ScreenWatcherMobileService.class);
             stopService(serviceIntent);
@@ -63,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
         }
         catch(Exception e)
         {
-
+            FileLog.d("method finish with exception: "+ex.getMessage());
         }
 
     }

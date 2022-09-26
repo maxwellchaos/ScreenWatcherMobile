@@ -66,30 +66,35 @@ public class DesktopList extends Fragment {
 
         @Override
         protected Void doInBackground(Void... unused) {
+            FileLog.d("Method start");
             try {
                 //result = Desktop.getContent("http://62.109.29.127:80/api/ToMobile/");
-                String ipAdress = ((MainActivity)getActivity()).getIpAddress();
-                result = Desktop.getContent("http://" + ipAdress + ":80/api/ToMobile/");
+                String ipAddress = ((MainActivity)getActivity()).getIpAddress();
+                result = Desktop.getContent("http://" + ipAddress + ":80/api/ToMobile/");
+                FileLog.d("From Server: "+ result);
             } catch (Exception ex) {
+                FileLog.d("From Server Error:" + ex.getMessage());
                 connectionError = ex.getMessage();
             }
-
+            FileLog.d("Method finish");
             return (null);
         }
 
         @Override
         protected void onPostExecute(Void unused) {
+            FileLog.d("method start");
             if (connectionError == null) {
 
                 //удалить все компьютеры из списка
                 ListLayout.removeAllViews();
                 DesktopIdList idList = new DesktopIdList(getContext());
+//                idList.clear();
 
                 Calendar cal = Calendar.getInstance();
                 TimeZone tz = cal.getTimeZone();
 
                 /* debug: is it local time? */
-                Log.d("Time zone: ", tz.getDisplayName());
+                FileLog.d("Time zone: "+ tz.getDisplayName());
 
                 /* date formatter in local timezone */
                 SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
@@ -103,7 +108,7 @@ public class DesktopList extends Fragment {
                         if(!idList.contains(item.getComputerId())) {
                             continue;
                         }
-                        Log.d("getting Data",item.getComputerName());
+                        FileLog.d("getting Data: "+item.getComputerName());
                         //Название компа
                         TextView textItem = new TextView(ListLayout.getContext());
                         textItem.setText(item.getComputerName());
@@ -146,6 +151,7 @@ public class DesktopList extends Fragment {
                     TextView statusItem = new TextView(ListLayout.getContext());
                     statusItem.setText("Ошибка загрузки данных:" + ex.getMessage());
                     ListLayout.addView(statusItem, 0);
+                    FileLog.d("Method finish with exception:"+ex.getMessage());
                 }
             }
             else

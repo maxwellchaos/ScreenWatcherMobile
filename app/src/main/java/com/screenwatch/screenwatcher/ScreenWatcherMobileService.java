@@ -59,14 +59,19 @@ public class ScreenWatcherMobileService extends Service {
         ForedgroundServiceIntent = intent;
         IpAdress = intent.getStringExtra("ipAddress");
         String IdsList = intent.getStringExtra("idsList");
-        desktopIdsList = new DesktopIdList(IdsList);
 
+
+        desktopIdsList = new DesktopIdList(IdsList);
+        FileLog.d("IpAddress: "+ IpAdress);
+        if(IdsList == null) {
+            FileLog.d("idsList is null");
+        }
+        else {
+            FileLog.d("idsList:"+ IdsList);
+        }
         Toast.makeText((this), "Слежение запущено", Toast.LENGTH_SHORT).show();
         //Создать уведомление
         Notification notification = CreateNotification("", true);
-        Log.d("ipAddress", IpAdress);
-        Log.d("idsList", IdsList);
-
 
         //Поместить службу на передний план
         startForeground(1, notification);
@@ -79,31 +84,38 @@ public class ScreenWatcherMobileService extends Service {
 
     private Notification CreateNotification(String NotificationText, boolean isStartStop)
     {
-        String input = ForedgroundServiceIntent.getStringExtra("inputExtra");
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        //PendingIntent pendingIntent = PendingIntent.getService(this,
-        //        0,notificationIntent,
-        //         PendingIntent.FLAG_CANCEL_CURRENT);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this,
-                0, notificationIntent, 0);
-        String ChannelId;
-        if(isStartStop) {
-            ChannelId = getChannelId(startStopChannelId, startStopChannelNmae, "mainGroup", "Все уведомления");
+        FileLog.d("method start");
+        try {
+            String input = ForedgroundServiceIntent.getStringExtra("inputExtra");
+            Intent notificationIntent = new Intent(this, MainActivity.class);
+            //PendingIntent pendingIntent = PendingIntent.getService(this,
+            //        0,notificationIntent,
+            //         PendingIntent.FLAG_CANCEL_CURRENT);
+            PendingIntent pendingIntent = PendingIntent.getActivity(this,
+                    0, notificationIntent, 0);
+            String ChannelId;
+            if (isStartStop) {
+                ChannelId = getChannelId(startStopChannelId, startStopChannelNmae, "mainGroup", "Все уведомления");
+            } else {
+                ChannelId = getChannelId(alarmChannelId, alarmChannelName, "mainGroup", "Все уведомления");
+            }
+            Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+
+            FileLog.d("method finish");
+            return new NotificationCompat.Builder(this, ChannelId)
+                    .setContentTitle("LedBell работает")
+                    .setContentText(NotificationText)
+                    .setSound(null)
+                    .setSmallIcon(R.drawable.small_watcher)
+                    .setContentIntent(pendingIntent)
+                    .build();
         }
-        else
+        catch (Exception ex)
         {
-            ChannelId = getChannelId(alarmChannelId, alarmChannelName, "mainGroup", "Все уведомления");
+            FileLog.d("method finish with exception: "+ex.getMessage());
+            return null;
         }
-        Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
 
-
-        return  new NotificationCompat.Builder(this,ChannelId)
-                .setContentTitle("LedBell работает")
-                .setContentText(NotificationText)
-                .setSound(null)
-                .setSmallIcon(R.drawable.small_watcher)
-                .setContentIntent(pendingIntent)
-                .build();
     }
     @Override
     public IBinder onBind(Intent intent) {
@@ -115,10 +127,10 @@ public class ScreenWatcherMobileService extends Service {
     @Override
     public void onDestroy()
     {
+        FileLog.d("method start");
         if(thread!=null)
         {
             thread.interrupt();
-
         }
     }
 
@@ -126,98 +138,98 @@ public class ScreenWatcherMobileService extends Service {
     //запуск фоновой задачи на получение данных с сервиса
     private void LoopingGetData()
     {
-
+        FileLog.d("method start");
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
+                FileLog.d("method start");
+                boolean previousError = true;
+                while (true) {
+                    FileLog.d("Запуск следующей проверки");
 
-                    boolean previousError = true;
-                    while (true) {
-                        Log.d("Запуск следующей проверки", "");
+                    try {
+                        //подождать
+                        Thread.sleep(5000);//5 секунд
 
-                        try {
-                            //подождать
-                            Thread.sleep(10000);//10 секунд
+                        List<Desktop> newDesktopList;
+                        FileLog.d("getting Data from server "+ IpAdress);
+                        //взять данные с сервиса
+                        String result = Desktop.getContent("http://" + IpAdress + ":80/api/ToMobile/");
+                        newDesktopList = Desktop.Parse(result);
+                        FileLog.d("Data from server: "+ result);
+                        //проверить на изменение данных
+                        if (newDesktopList == null) {
+                            throw new Exception("Не удалось получить данные с сервера.");
 
-                            List<Desktop> newDesktopList;
-
-                            //взять данные с сервиса
-                            newDesktopList = Desktop.Parse(Desktop.getContent("http://" + IpAdress + ":80/api/ToMobile/"));
-                            //проверить на изменение данных
-                            if (newDesktopList == null) {
-                                throw new Exception("Не удалось получить данные с сервера.");
-                            }
-                            if (ScreenWatcherMobileService.this.desktopList == null) {
-                                ScreenWatcherMobileService.this.desktopList = newDesktopList;
-                                Log.d("MyService", "Старый список компьютеров отсутствует");
-                            }
-                            for (Desktop desktop : newDesktopList) {
-                                //Если компа нет в списке слежения
-                                if (!desktopIdsList.contains(desktop.getComputerId())) {
-                                    continue;
-                                } else {
-                                    Log.d("обработан desktop", desktop.getComputerId() + " " + desktop.getComputerName());
-                                    Log.d("status", String.valueOf(desktop.getStatus()));
-
-                                }
-                                int index = ScreenWatcherMobileService.this.desktopList.indexOf(desktop);
-                                if (index == -1) {
-                                    //Подключен новый десктоп
-                                    Log.d("MyService", "Подключен новый десктоп");
-                                    continue;
-                                }
-
-                                Desktop oldDesktop = ScreenWatcherMobileService.this.desktopList.get(index);
-                                //Если статус изменился
-                                if (oldDesktop.getStatus() != desktop.getStatus()) {
-                                    //Сообщать только если статус изменился особым образом
-                                    // if(oldDesktop.getStatus() != desktop.getStatus())
-                                    {
-                                        String notificationText = "Компьютер \"" + desktop.getComputerName() + "\" изменил свой статус на ";
-                                        if (desktop.getStatus() == 0) {
-                                            notificationText += "\"Нет подключения\"";
-                                        }
-                                        if (desktop.getStatus() == 1) {
-                                            notificationText += "\"Остановлен\"";
-                                        }
-                                        if (desktop.getStatus() == 2) {
-                                            notificationText += "\"Работает\"";
-                                        }
-                                        if (desktop.getStatus() == 3) {
-                                            notificationText += "\"Заблокирован\"";
-                                        }
-                                        if (desktop.getStatus() == 4) {
-                                            notificationText += "\"Разблокирован\"";
-                                        }
-                                        notificationSound.start();
-                                        Notification notification = CreateNotification(notificationText, false);
-                                        NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                                        mNotificationManager.notify(2, notification);
-                                        Log.d("notification", notificationText);
-                                    }
-                                }
-                            }
+                        }
+                        if (ScreenWatcherMobileService.this.desktopList == null) {
                             ScreenWatcherMobileService.this.desktopList = newDesktopList;
-                            previousError = false;
+                            FileLog.d( "Старый список компьютеров отсутствует");
                         }
-                        catch (InterruptedException e)
-                        {
-                            //Произошла внешняя остановка сервиса
-                            Log.d("service","interrupted");
-                            return;
-                        }
-                        catch (Exception ex) {
-                            //прочие ошибки
-                            if (!previousError) {
-                                notificationSound.start();
-                                Notification notification = CreateNotification("Ошибка получения данных с сервера. Проверьте интернет соединение.", false);
-                                NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-                                mNotificationManager.notify(3, notification);
-                                previousError = true;
-                                Log.e("MyService", "Ошибка получения данных с сервера: " + ex.getMessage());
+                        for (Desktop desktop : newDesktopList) {
+                            //Если компа нет в списке слежения
+                            if (!desktopIdsList.contains(desktop.getComputerId())) {
+                                continue;
+                            } else {
+                                FileLog.d("обработан desktop: "+ desktop.getComputerId() + " " + desktop.getComputerName());
+                                FileLog.d("status: "+ String.valueOf(desktop.getStatus()));
+
                             }
+                            int index = ScreenWatcherMobileService.this.desktopList.indexOf(desktop);
+                            if (index == -1) {
+                                //Подключен новый десктоп
+                                FileLog.d( "Подключен новый десктоп");
+                                continue;
+                            }
+
+                            Desktop oldDesktop = ScreenWatcherMobileService.this.desktopList.get(index);
+                            //Если статус изменился
+                            if (oldDesktop.getStatus() != desktop.getStatus()) {
+                                //Сообщать только если статус изменился особым образом
+                                // if(oldDesktop.getStatus() != desktop.getStatus())
+                                {
+                                    String notificationText = "Компьютер \"" + desktop.getComputerName() + "\" изменил свой статус на ";
+                                    if (desktop.getStatus() == 0) {
+                                        notificationText += "\"Нет подключения\"";
+                                    }
+                                    if (desktop.getStatus() == 1) {
+                                        notificationText += "\"Остановлен\"";
+                                    }
+                                    if (desktop.getStatus() == 2) {
+                                        notificationText += "\"Работает\"";
+                                    }
+                                    if (desktop.getStatus() == 3) {
+                                        notificationText += "\"Заблокирован\"";
+                                    }
+                                    if (desktop.getStatus() == 4) {
+                                        notificationText += "\"Разблокирован\"";
+                                    }
+                                    notificationSound.start();
+                                    Notification notification = CreateNotification(notificationText, false);
+                                    NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                                    mNotificationManager.notify(2, notification);
+                                    FileLog.d("notification:"+ notificationText);
+                                }
+                            }
+                        }
+                        ScreenWatcherMobileService.this.desktopList = newDesktopList;
+                        previousError = false;
+                    } catch (InterruptedException e) {
+                        //Произошла внешняя остановка сервиса
+                        FileLog.d("service interrupted");
+                        return;
+                    } catch (Exception ex) {
+                        //прочие ошибки
+                        if (!previousError) {
+                            notificationSound.start();
+                            Notification notification = CreateNotification("Ошибка получения данных с сервера. Проверьте интернет соединение.", false);
+                            NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+                            mNotificationManager.notify(3, notification);
+                            previousError = true;
+                            FileLog.d("Ошибка получения данных с сервера: " + ex.getMessage());
                         }
                     }
+                }
 
             }
         });

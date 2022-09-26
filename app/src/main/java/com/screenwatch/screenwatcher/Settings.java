@@ -17,6 +17,8 @@ import com.screenwatch.screenwatcher.databinding.SettingsBinding;
 
 public class Settings extends Fragment {
 
+    public static final String ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION = "ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION";
+    public static final String ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION = "ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION";
     private SettingsBinding binding;
     private EditText edit;
 

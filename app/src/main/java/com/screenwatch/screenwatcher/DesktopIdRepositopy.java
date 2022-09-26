@@ -8,5 +8,7 @@ public interface DesktopIdRepositopy {
         void removeDesktopId(String desktopId);
         //проверить, есть ли в списке
         boolean contains(String desktopId);
+        //очистить список
+        void clear();
 }
 
