@@ -78,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
             stopService(serviceIntent);
             Toast.makeText(this, "Слежение остановлено", Toast.LENGTH_SHORT).show();
         }
-        catch(Exception e)
+        catch(Exception ex)
         {
             FileLog.d("method finish with exception: "+ex.getMessage());
         }

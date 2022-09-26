@@ -12,12 +12,18 @@ import java.util.Date;
 
 public class FileLog {
     public static final String TAG = "@@@@#!!!!";
-    public static final String filename = "LedBell.txt";
+    public static final String serviceFilename = "LedBellService.txt";
+    public static final String activityFilename = "LedBellActivity.txt";
 
     public static void d(String msg) {
         String logLine = getLocation()+ msg;
         android.util.Log.d(TAG,logLine);
-        appendLog(logLine);
+        appendLog(logLine,activityFilename);
+    }
+    public static void s(String msg) {
+        String logLine = getLocation()+ msg;
+        android.util.Log.d(TAG,logLine);
+        appendLog("Service:"+logLine,serviceFilename);
     }
 
     private static String getLocation() {
@@ -63,13 +69,13 @@ public class FileLog {
     }
 
 
-    public static void createLog() {
+    public static void createLog(String filename) {
         File file = getLogFile(filename);
         if (file.exists()) file.delete();
         try {
             file.createNewFile();
 
-            appendLog( "Created at " + new Date().toString());
+            appendLog( "Created at " + new Date().toString(),filename);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -77,9 +83,9 @@ public class FileLog {
 
     }
 
-    public static void appendLog(String line) {
+    public static void appendLog(String line,String filename) {
         File file = getLogFile(filename);
-        if (!file.exists()) createLog();
+        if (!file.exists()) createLog(filename);
 
         try {
             BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(file, true));

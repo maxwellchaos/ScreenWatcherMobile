@@ -33,7 +33,7 @@ public class ScreenWatcherMobileService extends Service {
 
     public static final String CHANNEL_ID = "ForegroundServiceChannel";
 
-    private String IpAdress;// = "http://62.109.29.127:80/api/ToMobile/";
+    private String IpAdress;
     private List<Desktop> desktopList;
     private DesktopIdList desktopIdsList;
     // private Notification notification;
@@ -47,8 +47,6 @@ public class ScreenWatcherMobileService extends Service {
     public void onCreate()
     {
         notificationSound = MediaPlayer.create(this,R.raw.uvedomlenie_0_db);
-
-        //Log.e("err", "onCreate");
         super.onCreate();
 
     }
@@ -62,12 +60,16 @@ public class ScreenWatcherMobileService extends Service {
 
 
         desktopIdsList = new DesktopIdList(IdsList);
-        FileLog.d("IpAddress: "+ IpAdress);
+        FileLog.s("IpAddress: "+ IpAdress);
+        if(IpAdress == null)
+        {
+            return START_NOT_STICKY;
+        }
         if(IdsList == null) {
-            FileLog.d("idsList is null");
+            FileLog.s("idsList is null");
         }
         else {
-            FileLog.d("idsList:"+ IdsList);
+            FileLog.s("idsList:"+ IdsList);
         }
         Toast.makeText((this), "Слежение запущено", Toast.LENGTH_SHORT).show();
         //Создать уведомление
@@ -84,7 +86,7 @@ public class ScreenWatcherMobileService extends Service {
 
     private Notification CreateNotification(String NotificationText, boolean isStartStop)
     {
-        FileLog.d("method start");
+        FileLog.s("method start");
         try {
             String input = ForedgroundServiceIntent.getStringExtra("inputExtra");
             Intent notificationIntent = new Intent(this, MainActivity.class);
@@ -101,7 +103,7 @@ public class ScreenWatcherMobileService extends Service {
             }
             Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
 
-            FileLog.d("method finish");
+            FileLog.s("method finish");
             return new NotificationCompat.Builder(this, ChannelId)
                     .setContentTitle("LedBell работает")
                     .setContentText(NotificationText)
@@ -112,7 +114,7 @@ public class ScreenWatcherMobileService extends Service {
         }
         catch (Exception ex)
         {
-            FileLog.d("method finish with exception: "+ex.getMessage());
+            FileLog.s("method finish with exception: "+ex.getMessage());
             return null;
         }
 
@@ -127,7 +129,7 @@ public class ScreenWatcherMobileService extends Service {
     @Override
     public void onDestroy()
     {
-        FileLog.d("method start");
+        FileLog.s("method start");
         if(thread!=null)
         {
             thread.interrupt();
@@ -138,25 +140,24 @@ public class ScreenWatcherMobileService extends Service {
     //запуск фоновой задачи на получение данных с сервиса
     private void LoopingGetData()
     {
-        FileLog.d("method start");
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                FileLog.d("method start");
+                FileLog.s("method start");
                 boolean previousError = true;
                 while (true) {
-                    FileLog.d("Запуск следующей проверки");
+                    FileLog.s("Запуск следующей проверки");
 
                     try {
                         //подождать
                         Thread.sleep(5000);//5 секунд
 
                         List<Desktop> newDesktopList;
-                        FileLog.d("getting Data from server "+ IpAdress);
+                        FileLog.s("getting Data from server "+ IpAdress);
                         //взять данные с сервиса
                         String result = Desktop.getContent("http://" + IpAdress + ":80/api/ToMobile/");
                         newDesktopList = Desktop.Parse(result);
-                        FileLog.d("Data from server: "+ result);
+                        FileLog.s("Data from server: "+ result);
                         //проверить на изменение данных
                         if (newDesktopList == null) {
                             throw new Exception("Не удалось получить данные с сервера.");
@@ -164,21 +165,21 @@ public class ScreenWatcherMobileService extends Service {
                         }
                         if (ScreenWatcherMobileService.this.desktopList == null) {
                             ScreenWatcherMobileService.this.desktopList = newDesktopList;
-                            FileLog.d( "Старый список компьютеров отсутствует");
+                            FileLog.s( "Старый список компьютеров отсутствует");
                         }
                         for (Desktop desktop : newDesktopList) {
                             //Если компа нет в списке слежения
                             if (!desktopIdsList.contains(desktop.getComputerId())) {
                                 continue;
                             } else {
-                                FileLog.d("обработан desktop: "+ desktop.getComputerId() + " " + desktop.getComputerName());
-                                FileLog.d("status: "+ String.valueOf(desktop.getStatus()));
+                                FileLog.s("обработан desktop: "+ desktop.getComputerId() + " " + desktop.getComputerName());
+                                FileLog.s("status: "+ String.valueOf(desktop.getStatus()));
 
                             }
                             int index = ScreenWatcherMobileService.this.desktopList.indexOf(desktop);
                             if (index == -1) {
                                 //Подключен новый десктоп
-                                FileLog.d( "Подключен новый десктоп");
+                                FileLog.s( "Подключен новый десктоп");
                                 continue;
                             }
 
@@ -208,7 +209,7 @@ public class ScreenWatcherMobileService extends Service {
                                     Notification notification = CreateNotification(notificationText, false);
                                     NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                                     mNotificationManager.notify(2, notification);
-                                    FileLog.d("notification:"+ notificationText);
+                                    FileLog.s("notification:"+ notificationText);
                                 }
                             }
                         }
@@ -216,7 +217,7 @@ public class ScreenWatcherMobileService extends Service {
                         previousError = false;
                     } catch (InterruptedException e) {
                         //Произошла внешняя остановка сервиса
-                        FileLog.d("service interrupted");
+                        FileLog.s("service interrupted");
                         return;
                     } catch (Exception ex) {
                         //прочие ошибки
@@ -226,7 +227,7 @@ public class ScreenWatcherMobileService extends Service {
                             NotificationManager mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
                             mNotificationManager.notify(3, notification);
                             previousError = true;
-                            FileLog.d("Ошибка получения данных с сервера: " + ex.getMessage());
+                            FileLog.s("Ошибка получения данных с сервера: " + ex.getMessage());
                         }
                     }
                 }
