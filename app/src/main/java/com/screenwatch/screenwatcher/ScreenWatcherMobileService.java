@@ -71,10 +71,10 @@ public class ScreenWatcherMobileService extends Service {
         else {
             FileLog.s("idsList:"+ IdsList);
         }
-        Toast.makeText((this), "Слежение запущено", Toast.LENGTH_SHORT).show();
+        Toast.makeText((this), "Слежение (пере)запущено", Toast.LENGTH_SHORT).show();
         //Создать уведомление
         Notification notification = CreateNotification("", true);
-
+        FileLog.s("notification created");
         //Поместить службу на передний план
         startForeground(1, notification);
         //do heavy work on a background thread
@@ -89,18 +89,24 @@ public class ScreenWatcherMobileService extends Service {
         FileLog.s("method start");
         try {
             String input = ForedgroundServiceIntent.getStringExtra("inputExtra");
+            FileLog.s("1");
             Intent notificationIntent = new Intent(this, MainActivity.class);
             //PendingIntent pendingIntent = PendingIntent.getService(this,
             //        0,notificationIntent,
             //         PendingIntent.FLAG_CANCEL_CURRENT);
+            FileLog.s("2");
             PendingIntent pendingIntent = PendingIntent.getActivity(this,
                     0, notificationIntent, 0);
             String ChannelId;
+            FileLog.s("3");
             if (isStartStop) {
+                FileLog.s("3.1");
                 ChannelId = getChannelId(startStopChannelId, startStopChannelNmae, "mainGroup", "Все уведомления");
             } else {
+                FileLog.s("3.2");
                 ChannelId = getChannelId(alarmChannelId, alarmChannelName, "mainGroup", "Все уведомления");
             }
+            FileLog.s("4");
             Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
 
             FileLog.s("method finish");

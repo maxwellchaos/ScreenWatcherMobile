@@ -68,6 +68,7 @@ public class DesktopList extends Fragment {
         protected Void doInBackground(Void... unused) {
             FileLog.d("Method start");
             try {
+                //wait(10000);
                 //result = Desktop.getContent("http://62.109.29.127:80/api/ToMobile/");
                 String ipAddress = ((MainActivity)getActivity()).getIpAddress();
                 result = Desktop.getContent("http://" + ipAddress + ":80/api/ToMobile/");
@@ -103,6 +104,7 @@ public class DesktopList extends Fragment {
 
                 try {
                     //Разбираю полученные данные
+                    FileLog.d(result);
                     List<Desktop> dataItems = Desktop.Parse(result);
                     for (Desktop item : dataItems) {
                         if(!idList.contains(item.getComputerId())) {

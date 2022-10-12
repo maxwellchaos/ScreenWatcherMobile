@@ -61,6 +61,8 @@ public class Settings extends Fragment {
             public void onClick(View view) {
 
                 ((MainActivity) getActivity()).ServiceStop();
+                Toast.makeText(((MainActivity) getActivity()), "Слежение остановлено", Toast.LENGTH_SHORT).show();
+
             }
         });
     }

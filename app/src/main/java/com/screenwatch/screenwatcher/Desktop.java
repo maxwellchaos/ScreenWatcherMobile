@@ -153,7 +153,11 @@ public class Desktop extends Object {
             }
             FileLog.d("method finish, Returned data:" + (buf.toString()));
             return (buf.toString());
-        } finally {
+        }
+        catch (Exception exception){
+            FileLog.d("method finish with exception");
+        }
+        finally {
             if (reader != null) {
                 reader.close();
             }
@@ -163,8 +167,9 @@ public class Desktop extends Object {
             if (connection != null) {
                 connection.disconnect();
             }
-            FileLog.d("method finish with exception");
+
         }
+        return null;
     }
 
 }

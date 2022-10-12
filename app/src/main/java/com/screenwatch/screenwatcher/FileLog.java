@@ -1,6 +1,7 @@
 package com.screenwatch.screenwatcher;
 
 import android.app.Application;
+import android.icu.text.SimpleDateFormat;
 import android.os.Environment;
 import android.text.TextUtils;
 
@@ -16,7 +17,9 @@ public class FileLog {
     public static final String activityFilename = "LedBellActivity.txt";
 
     public static void d(String msg) {
-        String logLine = getLocation()+ msg;
+        SimpleDateFormat formatForDateNow = new SimpleDateFormat("hh:mm:ss");
+
+        String logLine = formatForDateNow.format(new Date()) + getLocation()+ msg;
         android.util.Log.d(TAG,logLine);
         appendLog(logLine,activityFilename);
     }

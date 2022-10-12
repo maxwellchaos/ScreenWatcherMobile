@@ -107,13 +107,13 @@ public class DesktopIdList implements DesktopIdRepositopy
     private void saveIdList()
     {
         FileLog.d("methodStart");
-        try{
-        Gson gson = new Gson();
-        String result = gson.toJson(idList);
+        try {
+            Gson gson = new Gson();
+            String result = gson.toJson(idList);
 
-        SharedPreferences.Editor editor = settings.edit();
-        editor.putString(idsList,result);
-        editor.apply();
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putString(idsList, result);
+            editor.apply();
         } catch (Exception ex) {
             FileLog.d("MethodFinish with Exception: "+ex.getMessage());
         }

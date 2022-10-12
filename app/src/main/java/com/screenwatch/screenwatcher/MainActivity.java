@@ -28,12 +28,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        FileLog.d("method start");
         //Запрос прав на файлы для логгирования
         if (!PermissionUtils.hasPermissions(MainActivity.this))
         PermissionUtils.requestPermissions(MainActivity.this, PERMISSION_STORAGE);
 
-        settings = getSharedPreferences("serverSettings",MODE_PRIVATE);
+        settings = this.getSharedPreferences(DesktopIdList.clientSettings, MODE_PRIVATE);
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
 
         ServiceStart();
+        FileLog.d("method finish");
     }
     public void ServiceStart()
     {
@@ -58,12 +59,13 @@ public class MainActivity extends AppCompatActivity {
             Intent serviceIntent = new Intent(this, ScreenWatcherMobileService.class);
             serviceIntent.putExtra("ipAddress", getIpAddress());
 
-            settings = this.getSharedPreferences(DesktopIdList.clientSettings, MODE_PRIVATE);
+            //settings = this.getSharedPreferences(DesktopIdList.clientSettings, MODE_PRIVATE);
             String data = settings.getString(DesktopIdList.idsList, null);
             serviceIntent.putExtra("idsList", data);
 
             ContextCompat.startForegroundService(this, serviceIntent);
             FileLog.d("method finish");
+
         }
         catch (Exception ex)
         {
@@ -76,7 +78,6 @@ public class MainActivity extends AppCompatActivity {
         try {
             Intent serviceIntent = new Intent(this, ScreenWatcherMobileService.class);
             stopService(serviceIntent);
-            Toast.makeText(this, "Слежение остановлено", Toast.LENGTH_SHORT).show();
         }
         catch(Exception ex)
         {
@@ -86,12 +87,14 @@ public class MainActivity extends AppCompatActivity {
     }
     public void saveIpAddress(String serverIpAddress)
     {
+        FileLog.d("method start");
         SharedPreferences.Editor editor = settings.edit();
         editor.putString("serverIpAddress",serverIpAddress);
         editor.apply();
     }
     public String getIpAddress()
     {
+        FileLog.d(settings.getString("serverIpAddress",null));
         return settings.getString("serverIpAddress",null);
     }
 
